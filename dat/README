@@ -1,0 +1,7 @@
+I used the folowing code to get the first 100 lines of the datafile.
+
+$ head -100 coordenadas.dat >> data-sample.dat
+
+But if you want to pic 100 randomly you can use the script, in ../etc/:
+
+$ ../etc/pic.sh 100 coordenadas.dat data-sample.dat
