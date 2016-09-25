@@ -1,0 +1,12 @@
+
+In this folter are content all the scripts that helps in the correct use and
+depuration of the code.
+
+LIST
+1. pic.sh:
+	use: /pic.sh <sample> <input_file.dat> <output_file.dat>
+	     sample:          how many lines want in the output.
+	     input_file.dat:  input file name.
+	     output_file.dat: output file name.
+
+2.
