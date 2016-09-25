@@ -5,6 +5,7 @@
 struct Particle
 {
   int *FNid;
+  float *Pos;
   float *FNdistance;
 
 };//end estruct Particle
@@ -13,10 +14,18 @@ struct Particle
 int main(int argc,char *argv[] )
 /*Se le pasa como argumento Opcional input.dat,output.dat, NFN(#de primeros vecinos) */
 {
-  char *inputfile;
-  char *outputfile;
+  FILE *in;
+  const char *inputfile;
+  const char *outputfile;
   int NFN;
-  int NTP=10; //argumento auxiliar de numero de particulas
+  int NTP=0; //argumento auxiliar de numero de particulas
+  int DIM=2; //argumento auxiliar de dimension
+  char * line = NULL; //Para leer el archivo
+  size_t len = 0; //Para leer el archivo
+  ssize_t read; //Para leer el archivo
+  char * pch;  //Para partir las lineas del archivo
+
+  
   if (argc<3)/*Si no se le pasa como argumento lo pregunta*/
     {
       printf( "Enter inputfile outputfile NFN:");
@@ -29,28 +38,31 @@ int main(int argc,char *argv[] )
     }//End if else
 
   //  printf("Inputfile: %s, outputfile: %s, Número de primeros vecinos: %i \n", inputfile, outputfile, NFN);
+
+  in=fopen( inputfile, "r" ); //Abro el archivo de datos
+  if (in == NULL)
+        exit(EXIT_FAILURE);
   
   struct Particle *bunch = malloc(sizeof(struct Particle) * NTP);
 
-  for(int i=0;i<=NTP;i++)
+  while ((read = getline(&line, &len, in)) != -1)
     {
-      bunch[i].FNid=malloc(sizeof(int)*NFN);
-      bunch[i].FNdistance=malloc(sizeof(float)*NFN);
+      //      printf("La linea de tamaño %zu :\n", read);
+      //      printf("%s \n", line);
       
-      for (int j=i+1;j<=NTP;j++)
-	{
-
-
-	  
-	}
-      
-
+      //Inicializa el vector de indices de primeros vecinos
+      bunch[NTP].FNid=malloc(sizeof(int)*NFN);
+      //Inicializa el vector de distancias de primeros vecinos
+      bunch[NTP].FNdistance=malloc(sizeof(float)*NFN);
+      //Inicializa el vector de posición
+      bunch[NTP].Pos=malloc(sizeof(float)*DIM);
+      NTP++; //Contador numero de particulas
     }
   
 
   
 
-  free(bunch);
+  //  free(bunch); //Me sale un error de liberado de memoria, sin eso si funciona
   return 0;
   
 }
