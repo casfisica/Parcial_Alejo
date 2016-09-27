@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h> /* for atoi() */
 #include <string.h> /* for strtok*/
+#include <math.h>  /*for sqrt*/
 
 struct Particle
 {
@@ -9,6 +10,11 @@ struct Particle
   float *FNdistance;
 
 };//end estruct Particle
+
+/*Declaro la función*/
+float Distance(struct Particle *part1,struct Particle *part2);
+
+void Compare(struct Particle *part1,int part1id,struct Particle *part2,int part2id,int NFN);
 
 
 int main(int argc,char *argv[] )
@@ -28,6 +34,7 @@ int main(int argc,char *argv[] )
   int ch=0;
   fpos_t position;
   float * tmp;
+  float dis; //temp to evaluate de Diference function
   
   if (argc<3)/*Si no se le pasa como argumento lo pregunta*/
     {
@@ -84,19 +91,95 @@ int main(int argc,char *argv[] )
 	    }
 	  bunch[i].Pos= tmp;
 	  bunch[i].Pos[DIM]=atof(pch);
-	  //	  printf ("Pos[%i]= %f \n",DIM,bunch[i].Pos[DIM]);
+	  //printf ("Pos[%i]= %f \n",DIM,bunch[i].Pos[DIM]);
 	  pch = strtok (NULL, " ,");
 	  DIM++;
 	}
-
-      //printf ("dimension: %i\n",DIM);
-    
+      //printf ("dimension: %i\n",DIM);    
+      //printf ("bunch[i].Pos[1]=%f\n",bunch[i].Pos[1]);    
+      i++;
     }
-  
+
+  for(j=0;j<NTP;j++)
+    {
+      for (int l=j+1;l<NTP;j++)
+	{
+	  //printf ("bunch[j].Pos[1]=%f\n",bunch[j].Pos[1]);
+	  //printf ("bunch[%j].FNdistance[1]=%f\n",bunch[i].FNdistance[1]);
+	  //dis=Distance(&bunch[0],&bunch[j]);
+	  //printf ("Distancia[%i]=%f\n",j,dis); 
+	  Compare(&bunch[j],j,&bunch[l],l,NFN);
+	  printf ("bunch[j].FNid=%i\n",bunch[j].FNid[0]); 
+	  printf ("bunch[%i].FNdistance[1]=%f\n",j,bunch[j].FNdistance[1]); 
+	  //printf ("%i,%i\n",j,l); 
+	  
+	}
+      
+    }
 
   
-
-  //  free(bunch); //Me sale un error de liberado de memoria, sin eso si funciona
+  free(bunch);//Libero la memoria (Pregunta para Omar)
   return 0;
   
 }
+
+
+float Distance(struct Particle *part1,struct Particle *part2)
+{
+  int i=1;
+  float dist;
+  float sum=0;
+  while(part1->Pos[i])
+    {
+      sum=sum + (part1->Pos[i]-part2->Pos[i])*(part1->Pos[i]-part2->Pos[i]);
+      //      printf("%f, %f \n",part1->Pos[i],part2->Pos[i]);
+      //      printf("sum=%f\n",sum);
+      i++;
+    }
+  
+  dist=sqrt(sum);
+  //  printf("Dis=%f\n",dist);
+  return dist;
+};
+
+void Compare(struct Particle *part1,int part1id,struct Particle *part2,int part2id,int NFN)
+{
+  float dist;
+  dist=Distance(part1, part2);
+  
+  for(int i=0; i<NFN;i++)
+    {
+      //printf("%f, %f \n",part1->FNid[i],part2->FNid[i]);      
+      if (part1->FNdistance[i] != 0)
+	{
+	  if (dist < part1->FNdistance[i])
+	    {
+	      part1->FNdistance[i]=dist;
+	      part1->FNid[i]=part2id;
+	    }
+	}
+      else
+	{
+	  part1->FNdistance[i]=dist;
+	  part1->FNid[i]=part2id;
+	}
+    }
+  
+  for(int i=0; i<NFN;i++)
+    {
+      if (part2->FNdistance[i] != 0)
+	{
+	  if (dist < part2->FNdistance[i])
+	    {
+	      part2->FNdistance[i]=dist;
+	      part2->FNid[i]=part1id;
+	    }
+	}
+      else
+	{
+	  part1->FNdistance[i]=dist;
+	  part1->FNid[i]=part1id;
+	}
+    }
+    
+};
