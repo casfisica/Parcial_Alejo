@@ -100,23 +100,33 @@ int main(int argc,char *argv[] )
       i++;
     }
 
-  for(j=0;j<NTP;j++)
-    {
-      for (int l=j+1;l<NTP;j++)
-	{
+  // for(j=0;j<NTP;j++)
+  //{
+  //  for (int l=j+1;l<NTP;j++)
+  //	{
 	  //printf ("bunch[j].Pos[1]=%f\n",bunch[j].Pos[1]);
 	  //printf ("bunch[%j].FNdistance[1]=%f\n",bunch[i].FNdistance[1]);
 	  //dis=Distance(&bunch[0],&bunch[j]);
 	  //printf ("Distancia[%i]=%f\n",j,dis); 
-	  Compare(&bunch[j],j,&bunch[l],l,NFN);
-	  printf ("bunch[j].FNid=%i\n",bunch[j].FNid[0]); 
-	  printf ("bunch[%i].FNdistance[1]=%f\n",j,bunch[j].FNdistance[1]); 
+	  //Compare(&bunch[j],j,&bunch[l],l,NFN);
+	  //printf ("bunch[j].FNid=%i\n",bunch[j].FNid[0]); 
+	  //printf ("bunch[%i].FNdistance[1]=%f\n",j,bunch[j].FNdistance[1]); 
 	  //printf ("%i,%i\n",j,l); 
 	  
-	}
+	  //	}
       
-    }
+	  //}
 
+  Compare(&bunch[0],0,&bunch[1],1,NFN);
+  printf ("bunch[%i].FNdistance[1]=%f\n",1,bunch[1].FNdistance[0]);
+  
+  Compare(&bunch[1],1,&bunch[2],2,NFN);
+  printf ("bunch[%i].FNdistance[1]=%f\n",1,bunch[1].FNdistance[1]);
+  
+  Compare(&bunch[2],2,&bunch[3],3,NFN);
+  printf ("bunch[%i].FNdistance[1]=%f\n",1,bunch[1].FNdistance[0]);
+  printf ("bunch[%i].FNdistance[1]=%f\n",1,bunch[1].FNdistance[1]);
+  printf ("bunch[%i].FNdistance[1]=%f\n",1,bunch[1].FNdistance[2]);
   
   free(bunch);//Libero la memoria (Pregunta para Omar)
   return 0;
@@ -146,13 +156,14 @@ void Compare(struct Particle *part1,int part1id,struct Particle *part2,int part2
 {
   float dist;
   dist=Distance(part1, part2);
+  printf("Distancia=%f",dist);
   
   for(int i=0; i<NFN;i++)
     {
       //printf("%f, %f \n",part1->FNid[i],part2->FNid[i]);      
       if (part1->FNdistance[i] != 0)
 	{
-	  if (dist < part1->FNdistance[i])
+	  if (part1->FNdistance[i]>dist)
 	    {
 	      part1->FNdistance[i]=dist;
 	      part1->FNid[i]=part2id;
