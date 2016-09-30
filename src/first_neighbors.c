@@ -8,38 +8,34 @@ struct Particle
   int *FNid;
   float *Pos;
   float *FNdistance;
+  float CMdistance;
 
 };//end estruct Particle
 
 /*Declaro la función*/
+struct Particle *Getdata(const char *inputfile, int NFN, int *num);
 float Distance(struct Particle *part1,struct Particle *part2);
-
 void Compare(struct Particle *part1,int part1id,struct Particle *part2,int part2id,int NFN);
 
 
 int main(int argc,char *argv[] )
 /*Se le pasa como argumento Opcional input.dat,output.dat, NFN(#de primeros vecinos) */
 {
-  FILE *in;
+  struct Particle *bunch;
   const char *inputfile;
   const char *outputfile;
-  int NFN,j,i;
-  int NTP=0; //argumento auxiliar de numero de particulas
-  int DIM=0; //argumento auxiliar de dimension
-  char * line = NULL; //Para leer el archivo
-  size_t len = 0; //Para leer el archivo
-  ssize_t read; //Para leer el archivo
-  char * pch;  //Para contar las columnas
-  char * pch1;  //Para partir las lineas del archivo
-  int ch=0;
-  fpos_t position;
-  float * tmp;
+  char input[100];
+  char output[100];
+  int NFN;
   float dis; //temp to evaluate de Diference function
+  int num=0;
   
   if (argc<3)/*Si no se le pasa como argumento lo pregunta*/
     {
       printf( "Enter inputfile outputfile NFN:");
-      scanf("%s %s %i", &inputfile, &outputfile, &NFN);
+      scanf("%s %s %i", &input, &output, &NFN);
+      inputfile=input;
+      outputfile=output; 
     }else
     {
       inputfile=argv[1];
@@ -47,15 +43,54 @@ int main(int argc,char *argv[] )
       NFN = atoi(argv[3]); 
     }//End if else
 
-  //printf("Inputfile: %s, outputfile: %s, Número de primeros vecinos: %i \n", inputfile, outputfile, NFN);
+  bunch = Getdata(inputfile,NFN,&num);//Lleno el vector de estructuras
+  //printf ("dimension: %i\n",num);
+  num=10;
+  for (int i=0; i<num; i++)
+    {
+      for (int j=i+1; j<num;j++)
+	{
+	  printf("i= %i ,j= %i\n",i,j);
+	  Compare(&bunch[i],i,&bunch[j],j, NFN);
+	}
+    }
+  for (int i=0; i<num; i++)
+    {
+      printf ("distancia[%i]: %f\n",i,bunch[i].FNdistance[0]);
+      printf ("distancia[%i]: %f\n",i,bunch[i].FNdistance[1]);
+    }
+
+  
+  return 0;
+  
+}//End main
+
+
+struct Particle *Getdata(const char *inputfile, int NFN, int *num)
+{
+  FILE *in;
+  fpos_t position;
+  char * line = NULL; //Para leer el archivo
+  size_t len = 0; //Para leer el archivo
+  ssize_t read; //Para leer el archivo
+  char * pch;  //Para contar las columnas
+  char * pch1;  //Para partir las lineas del archivo
+  int ch=0;
+  int NTP=0; //argumento auxiliar de numero de particulas
+  int DIM=0; //argumento auxiliar de dimension
+  int i=0;
+  float * tmp;
 
   in=fopen( inputfile, "r" ); //Abro el archivo de datos
   if (in == NULL)
-        exit(EXIT_FAILURE);
+    {
+      printf("Specify input file, or is not in the path\n");
+      exit(EXIT_FAILURE);
+    }
   
   fgetpos(in, &position); //Adquiere la posicion dentro del archivo(inicial)
-  
-  while(!feof(in))
+
+  while(!feof(in))//feof search the end of de file, para contar el número de particulas
     {
       ch = fgetc(in);
       if(ch == '\n')
@@ -63,10 +98,11 @@ int main(int argc,char *argv[] )
 	  NTP++;
 	}
     }
+  *num=NTP;
   fsetpos(in, &position);//manda el puntero a la pos inicial
-
+  
   struct Particle *bunch = malloc(sizeof(struct Particle) * NTP);
-  i=0;
+  
   //Mientras no se acabe el archivo lee las lineas en line
   while ((read = getline(&line, &len, in)) != -1)
     {
@@ -95,43 +131,15 @@ int main(int argc,char *argv[] )
 	  pch = strtok (NULL, " ,");
 	  DIM++;
 	}
-      //printf ("dimension: %i\n",DIM);    
-      //printf ("bunch[i].Pos[1]=%f\n",bunch[i].Pos[1]);    
+  
       i++;
     }
+  fclose(in);
 
-  // for(j=0;j<NTP;j++)
-  //{
-  //  for (int l=j+1;l<NTP;j++)
-  //	{
-	  //printf ("bunch[j].Pos[1]=%f\n",bunch[j].Pos[1]);
-	  //printf ("bunch[%j].FNdistance[1]=%f\n",bunch[i].FNdistance[1]);
-	  //dis=Distance(&bunch[0],&bunch[j]);
-	  //printf ("Distancia[%i]=%f\n",j,dis); 
-	  //Compare(&bunch[j],j,&bunch[l],l,NFN);
-	  //printf ("bunch[j].FNid=%i\n",bunch[j].FNid[0]); 
-	  //printf ("bunch[%i].FNdistance[1]=%f\n",j,bunch[j].FNdistance[1]); 
-	  //printf ("%i,%i\n",j,l); 
-	  
-	  //	}
-      
-	  //}
+  return bunch;
+}//End Getdata
 
-  Compare(&bunch[0],0,&bunch[1],1,NFN);
-  printf ("bunch[%i].FNdistance[1]=%f\n",1,bunch[1].FNdistance[0]);
-  
-  Compare(&bunch[1],1,&bunch[2],2,NFN);
-  printf ("bunch[%i].FNdistance[1]=%f\n",1,bunch[1].FNdistance[1]);
-  
-  Compare(&bunch[2],2,&bunch[3],3,NFN);
-  printf ("bunch[%i].FNdistance[1]=%f\n",1,bunch[1].FNdistance[0]);
-  printf ("bunch[%i].FNdistance[1]=%f\n",1,bunch[1].FNdistance[1]);
-  printf ("bunch[%i].FNdistance[1]=%f\n",1,bunch[1].FNdistance[2]);
-  
-  free(bunch);//Libero la memoria (Pregunta para Omar)
-  return 0;
-  
-}
+
 
 
 float Distance(struct Particle *part1,struct Particle *part2)
@@ -142,31 +150,40 @@ float Distance(struct Particle *part1,struct Particle *part2)
   while(part1->Pos[i])
     {
       sum=sum + (part1->Pos[i]-part2->Pos[i])*(part1->Pos[i]-part2->Pos[i]);
-      //      printf("%f, %f \n",part1->Pos[i],part2->Pos[i]);
-      //      printf("sum=%f\n",sum);
+      //printf("%f, %f \n",part1->Pos[i],part2->Pos[i]);
+      //printf("sum=%f\n",sum);
       i++;
     }
-  
   dist=sqrt(sum);
   //  printf("Dis=%f\n",dist);
   return dist;
 };
 
+
 void Compare(struct Particle *part1,int part1id,struct Particle *part2,int part2id,int NFN)
 {
   float dist;
   dist=Distance(part1, part2);
-  printf("Distancia=%f",dist);
+  printf("Distancia=%f\n",dist);
+  int condition=0;
   
   for(int i=0; i<NFN;i++)
     {
-      //printf("%f, %f \n",part1->FNid[i],part2->FNid[i]);      
       if (part1->FNdistance[i] != 0)
 	{
 	  if (part1->FNdistance[i]>dist)
 	    {
-	      part1->FNdistance[i]=dist;
-	      part1->FNid[i]=part2id;
+	      condition=0;
+	      for(int j=0; j<NFN;j++)//No perder ya encontrados
+		{
+		  if(dist==part1->FNdistance[j])
+		    condition=1;
+		}
+	      if(condition==0)
+		{
+		  part1->FNdistance[i]=dist;
+		  part1->FNid[i]=part2id;
+		}
 	    }
 	}
       else
@@ -174,23 +191,36 @@ void Compare(struct Particle *part1,int part1id,struct Particle *part2,int part2
 	  part1->FNdistance[i]=dist;
 	  part1->FNid[i]=part2id;
 	}
+      printf("part1->FNid[%i]= %i\n",i,part1->FNid[i]);
+      printf("part1->FNdistance[%i]=%f \n",i,part1->FNdistance[i]);
     }
   
   for(int i=0; i<NFN;i++)
     {
       if (part2->FNdistance[i] != 0)
 	{
-	  if (dist < part2->FNdistance[i])
+	  if (part2->FNdistance[i]>dist)
 	    {
-	      part2->FNdistance[i]=dist;
-	      part2->FNid[i]=part1id;
+	      condition=0;
+	      for(int j=0; j<NFN;j++)//No perder ya encontrados
+		{
+		  if(dist==part2->FNdistance[j])
+		    condition=1;
+		}
+	      if(condition==0)
+		{
+		  part2->FNdistance[i]=dist;
+		  part2->FNid[i]=part1id;
+		}
 	    }
 	}
       else
 	{
-	  part1->FNdistance[i]=dist;
-	  part1->FNid[i]=part1id;
+	  part2->FNdistance[i]=dist;
+	  part2->FNid[i]=part1id;
 	}
+      printf("part2->FNid[%i]= %i\n",i,part2->FNid[i]);
+      printf("part2->FNdistance[%i]=%f \n",i,part2->FNdistance[i]);      
     }
-    
+  
 };
