@@ -9,13 +9,15 @@ struct Particle
   float *Pos;
   float *FNdistance;
   float CMdistance;
+  int Ntri;
 
 };//end estruct Particle
 
-/*Declaro la función*/
+/*Declaro las funciones*/
 struct Particle *Getdata(const char *inputfile, int NFN, int *num);
 float Distance(struct Particle *part1,struct Particle *part2);
 void Compare(struct Particle *part1,int part1id,struct Particle *part2,int part2id,int NFN);
+void Gettrinagles(struct Particle *part1,int part1id,struct Particle *part2,int part2id);
 
 
 int main(int argc,char *argv[] )
@@ -59,7 +61,8 @@ int main(int argc,char *argv[] )
       printf ("distancia[%i]: %f\n",i,bunch[i].FNdistance[0]);
       printf ("distancia[%i]: %f\n",i,bunch[i].FNdistance[1]);
     }
-
+  printf ("distancia[7]: %f\n",bunch[7].FNdistance[0]);
+  printf ("distancia[7]: %f\n",bunch[7].FNdistance[1]);
   
   return 0;
   
@@ -140,8 +143,6 @@ struct Particle *Getdata(const char *inputfile, int NFN, int *num)
 }//End Getdata
 
 
-
-
 float Distance(struct Particle *part1,struct Particle *part2)
 {
   int i=1;
@@ -176,7 +177,7 @@ void Compare(struct Particle *part1,int part1id,struct Particle *part2,int part2
 	      condition=0;
 	      for(int j=0; j<NFN;j++)//No perder ya encontrados
 		{
-		  if(dist==part1->FNdistance[j])
+		  if(part1->FNid[j]==part2id)
 		    condition=1;
 		}
 	      if(condition==0)
@@ -188,8 +189,17 @@ void Compare(struct Particle *part1,int part1id,struct Particle *part2,int part2
 	}
       else
 	{
-	  part1->FNdistance[i]=dist;
-	  part1->FNid[i]=part2id;
+	  condition=0;
+	      for(int j=0; j<NFN;j++)//No perder ya encontrados
+		{
+		  if(part1->FNid[j]==part2id)
+		    condition=1;
+		}
+	      if(condition==0)
+		{
+		  part1->FNdistance[i]=dist;
+		  part1->FNid[i]=part2id;
+		}
 	}
       printf("part1->FNid[%i]= %i\n",i,part1->FNid[i]);
       printf("part1->FNdistance[%i]=%f \n",i,part1->FNdistance[i]);
@@ -204,7 +214,7 @@ void Compare(struct Particle *part1,int part1id,struct Particle *part2,int part2
 	      condition=0;
 	      for(int j=0; j<NFN;j++)//No perder ya encontrados
 		{
-		  if(dist==part2->FNdistance[j])
+		  if(part2->FNid[j]==part1id)
 		    condition=1;
 		}
 	      if(condition==0)
@@ -216,11 +226,20 @@ void Compare(struct Particle *part1,int part1id,struct Particle *part2,int part2
 	}
       else
 	{
-	  part2->FNdistance[i]=dist;
-	  part2->FNid[i]=part1id;
+	   condition=0;
+	   for(int j=0; j<NFN;j++)//No perder ya encontrados
+	     {
+	       if(part2->FNid[j]==part1id)
+		 condition=1;
+	     }
+	   if(condition==0)
+	     {
+	       part2->FNdistance[i]=dist;
+	       part2->FNid[i]=part1id;
+	     }
 	}
-      printf("part2->FNid[%i]= %i\n",i,part2->FNid[i]);
-      printf("part2->FNdistance[%i]=%f \n",i,part2->FNdistance[i]);      
+      //printf("part2->FNid[%i]= %i\n",i,part2->FNid[i]);
+      //printf("part2->FNdistance[%i]=%f \n",i,part2->FNdistance[i]);      
     }
   
 };
